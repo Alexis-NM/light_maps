@@ -1,0 +1,189 @@
+export const translations = {
+    en: {
+        // Tabs
+        map: "Map",
+        search: "Search",
+        saved: "Saved",
+        settings: "Settings",
+
+        // Map screen
+        yourLocation: "Your location",
+        selectedLocation: "Selected Location",
+        saveLocation: "Save Location",
+        getDirections: "Get Directions",
+
+        // Place details
+        rating: "Rating",
+        reviews: "reviews",
+        noRating: "No rating",
+        openNow: "Open now",
+        closed: "Closed",
+        seeReviews: "See reviews",
+        noReviews: "No reviews available",
+        closeReviews: "Close",
+
+        // Search screen
+        searchPlaceholder: "Search for a place...",
+        searchButton: "Search",
+        searchEmpty: "Search for places, addresses, or businesses",
+        noResults: "No results found",
+        networkError: "Network error. Please try again.",
+
+        // Saved places
+        savedPlaces: "Saved Places",
+        noSavedPlaces: "No saved places",
+        noSavedPlacesDesc: "Tap on the map to select a location, then save it to access it quickly later",
+        deletePlaceTitle: "Delete Place",
+        deletePlaceMessage: "Remove this place from saved places?",
+        savedOn: "Saved",
+
+        // Settings
+        appearance: "Appearance",
+        theme: "Theme",
+        light: "Light",
+        dark: "Dark",
+        location: "Location",
+        locationEnabled: "Location Enabled",
+        enableLocation: "Enable Location",
+        locationDenied: "Permission Denied",
+        locationDeniedMessage: "Location permission is required to show your position on the map. Please enable it in Settings.",
+        locationGranted: "Permission Granted",
+        locationGrantedMessage: "Location access is now enabled.",
+        locationPermissionTitle: "Location Permission",
+        locationPermissionMessage: "Maps needs access to your location to show your position on the map.",
+        askLater: "Ask Later",
+        disableLocationTitle: "Disable Location",
+        disableLocationMessage: "To disable location access, go to your device settings.",
+        openSettings: "Open Settings",
+        data: "Data",
+        clearSavedPlaces: "Clear Saved Places",
+        clearSavedPlacesTitle: "Clear Saved Places",
+        clearSavedPlacesMessage: "This will remove all saved places. Are you sure?",
+        clearAll: "Clear All",
+        cleared: "Cleared",
+        clearedMessage: "All saved places have been removed.",
+        noPlacesToClear: "No Places",
+        noPlacesToClearMessage: "You don't have any saved places to clear.",
+        about: "About",
+        version: "Maps v1.0.5",
+        description: "Maps for Light Phone III",
+
+        // API Key
+        apiKey: "API Key",
+        setupApiKey: "Setup API Key",
+        enterApiKey: "Enter your Google Maps API key",
+        apiKeyPlaceholder: "Paste your key here",
+        saveApiKey: "Save",
+        invalidApiKey: "Invalid API key format",
+        deleteApiKey: "Delete API Key",
+        deleteApiKeyTitle: "Delete API Key",
+        deleteApiKeyConfirm: "This will remove your API key. You'll need to enter it again.",
+        apiKeyConfigured: "Key configured",
+        modifyApiKey: "Modify API Key",
+
+        // Common
+        cancel: "Cancel",
+        delete: "Delete",
+        confirm: "Confirm",
+        yes: "Yes",
+        no: "No",
+        ok: "OK",
+        error: "Error",
+        loading: "Loading...",
+    },
+    fr: {
+        // Tabs
+        map: "Carte",
+        search: "Recherche",
+        saved: "Favoris",
+        settings: "Paramètres",
+
+        // Map screen
+        yourLocation: "Votre position",
+        selectedLocation: "Lieu sélectionné",
+        saveLocation: "Enregistrer",
+        getDirections: "Itinéraire",
+
+        // Place details
+        rating: "Note",
+        reviews: "avis",
+        noRating: "Pas de note",
+        openNow: "Ouvert",
+        closed: "Fermé",
+        seeReviews: "Voir les avis",
+        noReviews: "Aucun avis disponible",
+        closeReviews: "Fermer",
+
+        // Search screen
+        searchPlaceholder: "Rechercher un lieu...",
+        searchButton: "Rechercher",
+        searchEmpty: "Recherchez des lieux, adresses ou commerces",
+        noResults: "Aucun résultat",
+        networkError: "Erreur réseau. Réessayez.",
+
+        // Saved places
+        savedPlaces: "Lieux favoris",
+        noSavedPlaces: "Aucun favori",
+        noSavedPlacesDesc: "Appuyez sur la carte pour sélectionner un lieu, puis enregistrez-le pour y accéder rapidement",
+        deletePlaceTitle: "Supprimer",
+        deletePlaceMessage: "Retirer ce lieu des favoris ?",
+        savedOn: "Ajouté le",
+
+        // Settings
+        appearance: "Apparence",
+        theme: "Thème",
+        light: "Clair",
+        dark: "Sombre",
+        location: "Localisation",
+        locationEnabled: "Localisation activée",
+        enableLocation: "Activer la localisation",
+        locationDenied: "Permission refusée",
+        locationDeniedMessage: "La localisation est nécessaire pour afficher votre position. Activez-la dans les paramètres.",
+        locationGranted: "Permission accordée",
+        locationGrantedMessage: "L'accès à la localisation est activé.",
+        locationPermissionTitle: "Permission de localisation",
+        locationPermissionMessage: "Maps a besoin d'accéder à votre position pour l'afficher sur la carte.",
+        askLater: "Plus tard",
+        disableLocationTitle: "Désactiver la localisation",
+        disableLocationMessage: "Pour désactiver l'accès à la localisation, allez dans les paramètres de l'appareil.",
+        openSettings: "Ouvrir les paramètres",
+        data: "Données",
+        clearSavedPlaces: "Effacer les favoris",
+        clearSavedPlacesTitle: "Effacer les favoris",
+        clearSavedPlacesMessage: "Cela supprimera tous les favoris. Continuer ?",
+        clearAll: "Tout effacer",
+        cleared: "Effacé",
+        clearedMessage: "Tous les favoris ont été supprimés.",
+        noPlacesToClear: "Aucun favori",
+        noPlacesToClearMessage: "Vous n'avez aucun favori à supprimer.",
+        about: "À propos",
+        version: "Maps v1.0.5",
+        description: "Cartes pour Light Phone III",
+
+        // API Key
+        apiKey: "Clé API",
+        setupApiKey: "Configuration clé API",
+        enterApiKey: "Entrez votre clé API Google Maps",
+        apiKeyPlaceholder: "Collez votre clé ici",
+        saveApiKey: "Enregistrer",
+        invalidApiKey: "Format de clé API invalide",
+        deleteApiKey: "Supprimer la clé API",
+        deleteApiKeyTitle: "Supprimer la clé API",
+        deleteApiKeyConfirm: "Cela supprimera votre clé API. Vous devrez la saisir à nouveau.",
+        apiKeyConfigured: "Clé configurée",
+        modifyApiKey: "Modifier la clé API",
+
+        // Common
+        cancel: "Annuler",
+        delete: "Supprimer",
+        confirm: "Confirmer",
+        yes: "Oui",
+        no: "Non",
+        ok: "OK",
+        error: "Erreur",
+        loading: "Chargement...",
+    },
+} as const;
+
+export type Language = keyof typeof translations;
+export type TranslationKey = keyof typeof translations.en;
