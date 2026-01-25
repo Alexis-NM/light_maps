@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { View, StyleSheet, Pressable, ScrollView, Modal } from "react-native";
+import { View, StyleSheet, Pressable, ScrollView, Modal, Linking } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import { useInvertColors } from "@/contexts/InvertColorsContext";
@@ -27,6 +27,7 @@ interface PlaceDetails {
     openingHours?: string[];
     placeId?: string;
     reviews?: Review[];
+    phoneNumber?: string;
 }
 
 export default function MapScreen() {
@@ -127,7 +128,7 @@ export default function MapScreen() {
                     // Get place details
                     placesService.getDetails({
                         placeId: e.placeId,
-                        fields: ['name', 'formatted_address', 'rating', 'user_ratings_total', 'opening_hours', 'geometry', 'reviews']
+                        fields: ['name', 'formatted_address', 'rating', 'user_ratings_total', 'opening_hours', 'geometry', 'reviews', 'formatted_phone_number']
                     }, function(place, status) {
                         if (status === google.maps.places.PlacesServiceStatus.OK && place) {
                             const lat = place.geometry.location.lat();
@@ -144,7 +145,6 @@ export default function MapScreen() {
                             });
 
                             // Send place details to React Native
-                            // Use open_now property (boolean) instead of isOpen() method
                             window.ReactNativeWebView.postMessage(JSON.stringify({
                                 type: "placeSelect",
                                 placeId: e.placeId,
@@ -154,6 +154,7 @@ export default function MapScreen() {
                                 totalRatings: place.user_ratings_total || 0,
                                 isOpen: place.opening_hours ? place.opening_hours.open_now : null,
                                 openingHours: place.opening_hours ? place.opening_hours.weekday_text : null,
+                                phoneNumber: place.formatted_phone_number || null,
                                 latitude: lat,
                                 longitude: lng,
                                 reviews: reviews
@@ -286,6 +287,7 @@ export default function MapScreen() {
                             openingHours: data.openingHours,
                             placeId: data.placeId,
                             reviews: data.reviews,
+                            phoneNumber: data.phoneNumber,
                         });
                         break;
                     case "locationSelect":
@@ -428,46 +430,70 @@ export default function MapScreen() {
             {/* Place details panel */}
             {selectedLocation && placeDetails && (
                 <View style={[styles.placePanel, { backgroundColor: buttonBg }]}>
+                    {/* Header: Name + Status + Close - Fixed at top */}
                     <View style={styles.panelHeader}>
-                        <View style={styles.panelTitleRow}>
-                            <View style={styles.nameWithStatus}>
-                                <StyledText style={styles.placeName} numberOfLines={2}>
-                                    {placeDetails.name}
-                                </StyledText>
-                                {placeDetails.isOpen !== undefined && placeDetails.isOpen !== null && (
+                        <View style={styles.nameWithStatus}>
+                            <StyledText style={styles.placeName} numberOfLines={2}>
+                                {placeDetails.name}
+                            </StyledText>
+                            {placeDetails.isOpen !== undefined && placeDetails.isOpen !== null && (
+                                <View style={[
+                                    styles.statusBadge,
+                                    { backgroundColor: placeDetails.isOpen ? "#34A85320" : "#EA433520" }
+                                ]}>
                                     <StyledText style={[
-                                        styles.statusInline,
+                                        styles.statusText,
                                         { color: placeDetails.isOpen ? "#34A853" : "#EA4335" }
                                     ]}>
-                                        {" "}({placeDetails.isOpen ? t("openNow") : t("closed")})
+                                        {placeDetails.isOpen ? t("openNow") : t("closed")}
                                     </StyledText>
-                                )}
+                                </View>
+                            )}
+                        </View>
+                        <Pressable onPress={handleClearSelection} style={styles.closeButton}>
+                            <MaterialIcons name="close" size={n(20)} color={textColor} />
+                        </Pressable>
+                    </View>
+
+                    {/* Scrollable content */}
+                    <ScrollView
+                        style={styles.panelScrollContent}
+                        showsVerticalScrollIndicator={false}
+                        bounces={false}
+                    >
+                        {/* Info section: Rating + Address */}
+                        <View style={[styles.infoSection, { borderColor: textColor + "15" }]}>
+                            {placeDetails.rating && (
+                                <View style={styles.ratingRow}>
+                                    <StyledText style={styles.ratingText}>
+                                        {placeDetails.rating.toFixed(1)}
+                                    </StyledText>
+                                    <View style={styles.starsContainer}>
+                                        {renderStars(placeDetails.rating)}
+                                    </View>
+                                    {placeDetails.totalRatings && placeDetails.totalRatings > 0 && (
+                                        <StyledText style={styles.totalRatings}>
+                                            ({placeDetails.totalRatings})
+                                        </StyledText>
+                                    )}
+                                </View>
+                            )}
+
+                            <View style={styles.addressRow}>
+                                <MaterialIcons name="place" size={n(16)} color={textColor} style={{ opacity: 0.5 }} />
+                                <StyledText style={styles.placeAddress} numberOfLines={2}>
+                                    {placeDetails.address}
+                                </StyledText>
                             </View>
-                            <Pressable onPress={handleClearSelection} style={styles.closeButton}>
-                                <MaterialIcons name="close" size={n(20)} color={textColor} />
-                            </Pressable>
                         </View>
 
-                        {/* Rating */}
-                        {placeDetails.rating && (
-                            <View style={styles.ratingRow}>
-                                <StyledText style={styles.ratingText}>
-                                    {placeDetails.rating.toFixed(1)}
-                                </StyledText>
-                                <View style={styles.starsContainer}>
-                                    {renderStars(placeDetails.rating)}
-                                </View>
-                                {placeDetails.totalRatings && placeDetails.totalRatings > 0 && (
-                                    <StyledText style={styles.totalRatings}>
-                                        ({placeDetails.totalRatings} {t("reviews")})
-                                    </StyledText>
-                                )}
-                            </View>
-                        )}
-
-                        {/* Opening hours */}
+                        {/* Hours section */}
                         {placeDetails.openingHours && placeDetails.openingHours.length > 0 && (
-                            <View style={styles.hoursContainer}>
+                            <View style={[styles.hoursSection, { borderColor: textColor + "15" }]}>
+                                <View style={styles.hoursTitleRow}>
+                                    <MaterialIcons name="schedule" size={n(14)} color={textColor} style={{ opacity: 0.5 }} />
+                                    <StyledText style={styles.hoursTitle}>{t("openingHours")}</StyledText>
+                                </View>
                                 {placeDetails.openingHours.map((hour, index) => (
                                     <StyledText key={index} style={styles.hoursText}>
                                         {hour}
@@ -475,30 +501,35 @@ export default function MapScreen() {
                                 ))}
                             </View>
                         )}
+                    </ScrollView>
 
-                        {/* Address */}
-                        <StyledText style={styles.placeAddress} numberOfLines={2}>
-                            {placeDetails.address}
-                        </StyledText>
-                    </View>
-
-                    {/* Action buttons */}
+                    {/* Action buttons - Fixed at bottom */}
                     <View style={styles.actionButtons}>
                         <Pressable
                             onPress={handleSaveLocation}
-                            style={[styles.actionButton, { borderColor: textColor + "50" }]}
+                            style={[styles.actionButton, { borderColor: textColor + "30" }]}
                         >
-                            <MaterialIcons name="bookmark-add" size={n(16)} color={textColor} />
-                            <StyledText style={styles.actionButtonText}>{t("saveLocation")}</StyledText>
+                            <MaterialIcons name="bookmark-add" size={n(18)} color={textColor} />
                         </Pressable>
+
+                        {placeDetails.phoneNumber && (
+                            <Pressable
+                                onPress={() => {
+                                    triggerHaptic();
+                                    Linking.openURL(`tel:${placeDetails.phoneNumber}`);
+                                }}
+                                style={[styles.actionButton, { borderColor: textColor + "30" }]}
+                            >
+                                <MaterialIcons name="phone" size={n(18)} color={textColor} />
+                            </Pressable>
+                        )}
 
                         {placeDetails.reviews && placeDetails.reviews.length > 0 && (
                             <Pressable
                                 onPress={handleShowReviews}
-                                style={[styles.actionButton, { borderColor: textColor + "50" }]}
+                                style={[styles.actionButton, { borderColor: textColor + "30" }]}
                             >
-                                <MaterialIcons name="rate-review" size={n(16)} color={textColor} />
-                                <StyledText style={styles.actionButtonText}>{t("seeReviews")}</StyledText>
+                                <MaterialIcons name="rate-review" size={n(18)} color={textColor} />
                             </Pressable>
                         )}
                     </View>
@@ -581,7 +612,7 @@ const styles = StyleSheet.create({
     zoomControls: {
         position: "absolute",
         right: n(12),
-        top: n(12),
+        top: n(18),
         borderRadius: n(8),
         overflow: "hidden",
     },
@@ -601,93 +632,114 @@ const styles = StyleSheet.create({
         padding: n(12),
         borderRadius: n(8),
     },
-    // Place details panel - above navbar
+    // Place details panel - above navbar, max height to avoid top cutoff
     placePanel: {
         position: "absolute",
         left: n(12),
         right: n(12),
-        bottom: n(85),
+        bottom: n(10),
+        maxHeight: "95%",
         padding: n(14),
         borderRadius: n(12),
     },
     panelHeader: {
-        marginBottom: n(10),
-    },
-    panelTitleRow: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "flex-start",
+        marginBottom: n(12),
+    },
+    panelScrollContent: {
+        flexGrow: 0,
+        marginBottom: n(12),
     },
     nameWithStatus: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        alignItems: "baseline",
         flex: 1,
         marginRight: n(8),
+        gap: n(6),
     },
     placeName: {
-        fontSize: n(20),
+        fontSize: n(18),
         fontWeight: "700",
     },
-    statusInline: {
-        fontSize: n(14),
-        fontWeight: "500",
+    statusBadge: {
+        alignSelf: "flex-start",
+        paddingHorizontal: n(8),
+        paddingVertical: n(3),
+        borderRadius: n(4),
+    },
+    statusText: {
+        fontSize: n(12),
+        fontWeight: "600",
     },
     closeButton: {
         padding: n(4),
     },
+    infoSection: {
+        paddingBottom: n(12),
+        marginBottom: n(12),
+        borderBottomWidth: 1,
+        gap: n(8),
+    },
     ratingRow: {
         flexDirection: "row",
         alignItems: "center",
-        marginTop: n(6),
     },
     ratingText: {
-        fontSize: n(16),
+        fontSize: n(15),
         fontWeight: "600",
         marginRight: n(4),
     },
     starsContainer: {
         flexDirection: "row",
-        marginRight: n(4),
+        marginRight: n(6),
     },
     totalRatings: {
-        fontSize: n(14),
-        opacity: 0.6,
+        fontSize: n(13),
+        opacity: 0.5,
     },
-    hoursContainer: {
-        marginTop: n(8),
-        paddingTop: n(8),
-        borderTopWidth: 1,
-        borderTopColor: "rgba(128, 128, 128, 0.2)",
+    addressRow: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        gap: n(6),
     },
-    hoursText: {
-        fontSize: n(12),
+    placeAddress: {
+        flex: 1,
+        fontSize: n(13),
         opacity: 0.7,
         lineHeight: n(18),
     },
-    placeAddress: {
-        fontSize: n(14),
+    hoursSection: {
+        paddingBottom: n(12),
+        marginBottom: n(12),
+        borderBottomWidth: 1,
+    },
+    hoursTitleRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: n(6),
+        marginBottom: n(6),
+    },
+    hoursTitle: {
+        fontSize: n(13),
+        fontWeight: "600",
         opacity: 0.7,
-        marginTop: n(6),
-        lineHeight: n(20),
+    },
+    hoursText: {
+        fontSize: n(12),
+        opacity: 0.6,
+        lineHeight: n(17),
     },
     actionButtons: {
         flexDirection: "row",
-        gap: n(8),
+        gap: n(10),
     },
     actionButton: {
         flex: 1,
-        flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        paddingVertical: n(10),
+        paddingVertical: n(12),
         borderRadius: n(8),
         borderWidth: 1,
-    },
-    actionButtonText: {
-        fontSize: n(14),
-        marginLeft: n(5),
-        fontWeight: "500",
     },
     // Reviews modal - centered with margins for 1080×1240
     modalOverlay: {
