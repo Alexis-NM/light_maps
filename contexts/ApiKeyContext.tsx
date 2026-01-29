@@ -3,6 +3,8 @@ import React, {
     useContext,
     useState,
     useEffect,
+    useCallback,
+    useMemo,
     ReactNode,
 } from "react";
 import * as SecureStore from "expo-secure-store";
@@ -60,7 +62,7 @@ export const ApiKeyProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const setApiKey = async (key: string) => {
+    const setApiKey = useCallback(async (key: string) => {
         try {
             await SecureStore.setItemAsync(API_KEY_STORAGE_KEY, key);
             setApiKeyState(key);
@@ -68,9 +70,9 @@ export const ApiKeyProvider = ({ children }: { children: ReactNode }) => {
             console.error("Failed to save API key:", error);
             throw error;
         }
-    };
+    }, []);
 
-    const deleteApiKey = async () => {
+    const deleteApiKey = useCallback(async () => {
         try {
             await SecureStore.deleteItemAsync(API_KEY_STORAGE_KEY);
             setApiKeyState(null);
@@ -78,9 +80,9 @@ export const ApiKeyProvider = ({ children }: { children: ReactNode }) => {
             console.error("Failed to delete API key:", error);
             throw error;
         }
-    };
+    }, []);
 
-    const setMapId = async (id: string) => {
+    const setMapId = useCallback(async (id: string) => {
         try {
             await SecureStore.setItemAsync(MAP_ID_STORAGE_KEY, id);
             setMapIdState(id);
@@ -88,9 +90,9 @@ export const ApiKeyProvider = ({ children }: { children: ReactNode }) => {
             console.error("Failed to save Map ID:", error);
             throw error;
         }
-    };
+    }, []);
 
-    const deleteMapId = async () => {
+    const deleteMapId = useCallback(async () => {
         try {
             await SecureStore.deleteItemAsync(MAP_ID_STORAGE_KEY);
             setMapIdState(null);
@@ -98,22 +100,22 @@ export const ApiKeyProvider = ({ children }: { children: ReactNode }) => {
             console.error("Failed to delete Map ID:", error);
             throw error;
         }
-    };
+    }, []);
+
+    const value = useMemo(() => ({
+        apiKey,
+        mapId,
+        hasKey: apiKey !== null,
+        hasMapId: mapId !== null,
+        isLoading,
+        setApiKey,
+        deleteApiKey,
+        setMapId,
+        deleteMapId,
+    }), [apiKey, mapId, isLoading, setApiKey, deleteApiKey, setMapId, deleteMapId]);
 
     return (
-        <ApiKeyContext.Provider
-            value={{
-                apiKey,
-                mapId,
-                hasKey: apiKey !== null,
-                hasMapId: mapId !== null,
-                isLoading,
-                setApiKey,
-                deleteApiKey,
-                setMapId,
-                deleteMapId,
-            }}
-        >
+        <ApiKeyContext.Provider value={value}>
             {children}
         </ApiKeyContext.Provider>
     );

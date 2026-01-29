@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { View, StyleSheet, TextInput, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -37,13 +37,26 @@ export default function SearchScreen() {
 
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-    const textColor = invertColors ? "#000000" : "#FFFFFF";
-    const inputBg = invertColors ? "#F0F0F0" : "#1A1A1A";
-    const borderColor = invertColors ? "#E0E0E0" : "#333333";
+    const colors = useMemo(() => ({
+        textColor: invertColors ? "#000000" : "#FFFFFF",
+        inputBg: invertColors ? "#F0F0F0" : "#1A1A1A",
+        borderColor: invertColors ? "#E0E0E0" : "#333333",
+    }), [invertColors]);
+
+    const { textColor, inputBg, borderColor } = colors;
 
     // Load history on mount
     useEffect(() => {
         loadHistory();
+    }, []);
+
+    // Cleanup debounce on unmount
+    useEffect(() => {
+        return () => {
+            if (debounceRef.current) {
+                clearTimeout(debounceRef.current);
+            }
+        };
     }, []);
 
     const loadHistory = async () => {
@@ -57,29 +70,31 @@ export default function SearchScreen() {
         }
     };
 
-    const saveToHistory = async (result: SearchResult) => {
+    const saveToHistory = useCallback(async (result: SearchResult) => {
         try {
-            // Remove duplicate if exists
-            const filtered = history.filter(h => h.placeId !== result.placeId);
-            // Add to beginning, limit to MAX_HISTORY
-            const newHistory = [result, ...filtered].slice(0, MAX_HISTORY);
-            setHistory(newHistory);
-            await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+            setHistory(prev => {
+                const filtered = prev.filter(h => h.placeId !== result.placeId);
+                const newHistory = [result, ...filtered].slice(0, MAX_HISTORY);
+                AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+                return newHistory;
+            });
         } catch (err) {
             console.error("Failed to save history:", err);
         }
-    };
+    }, []);
 
-    const removeFromHistory = async (placeId: string) => {
+    const removeFromHistory = useCallback(async (placeId: string) => {
         triggerHaptic();
         try {
-            const newHistory = history.filter(h => h.placeId !== placeId);
-            setHistory(newHistory);
-            await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+            setHistory(prev => {
+                const newHistory = prev.filter(h => h.placeId !== placeId);
+                AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+                return newHistory;
+            });
         } catch (err) {
             console.error("Failed to remove from history:", err);
         }
-    };
+    }, [triggerHaptic]);
 
     // Autocomplete as user types
     const fetchAutocomplete = useCallback(async (input: string) => {
@@ -135,7 +150,7 @@ export default function SearchScreen() {
     };
 
     // Get place details from placeId
-    const getPlaceDetails = async (placeId: string): Promise<SearchResult | null> => {
+    const getPlaceDetails = useCallback(async (placeId: string): Promise<SearchResult | null> => {
         try {
             const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=place_id,name,formatted_address,geometry&key=${apiKey}`;
             const response = await fetch(url);
@@ -154,7 +169,7 @@ export default function SearchScreen() {
             console.error("Place details error:", err);
         }
         return null;
-    };
+    }, [apiKey]);
 
     const handleSearch = useCallback(async () => {
         if (!query.trim()) return;
@@ -196,7 +211,7 @@ export default function SearchScreen() {
         }
     }, [query, apiKey, userLocation]);
 
-    const handleSelectResult = async (result: SearchResult) => {
+    const handleSelectResult = useCallback(async (result: SearchResult) => {
         triggerHaptic();
         await saveToHistory(result);
         setMapCenter({ latitude: result.latitude, longitude: result.longitude }, 16);
@@ -208,9 +223,9 @@ export default function SearchScreen() {
             `goToPlace(${result.latitude}, ${result.longitude}, "${result.name.replace(/"/g, '\\"')}"); true;`
         );
         router.push("/(tabs)");
-    };
+    }, [triggerHaptic, saveToHistory, setMapCenter, selectLocation, webViewRef, router]);
 
-    const handleSelectSuggestion = async (suggestion: AutocompleteResult) => {
+    const handleSelectSuggestion = useCallback(async (suggestion: AutocompleteResult) => {
         triggerHaptic();
         setIsSearching(true);
 
@@ -228,9 +243,9 @@ export default function SearchScreen() {
             router.push("/(tabs)");
         }
         setIsSearching(false);
-    };
+    }, [triggerHaptic, getPlaceDetails, saveToHistory, setMapCenter, selectLocation, webViewRef, router]);
 
-    const handleSelectHistory = (item: SearchResult) => {
+    const handleSelectHistory = useCallback((item: SearchResult) => {
         triggerHaptic();
         setMapCenter({ latitude: item.latitude, longitude: item.longitude }, 16);
         selectLocation(
@@ -241,7 +256,7 @@ export default function SearchScreen() {
             `goToPlace(${item.latitude}, ${item.longitude}, "${item.name.replace(/"/g, '\\"')}"); true;`
         );
         router.push("/(tabs)");
-    };
+    }, [triggerHaptic, setMapCenter, selectLocation, webViewRef, router]);
 
     const renderSuggestion = ({ item }: { item: AutocompleteResult }) => (
         <Pressable

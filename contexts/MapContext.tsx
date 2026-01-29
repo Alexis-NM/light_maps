@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useRef, ReactNode, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useRef, ReactNode, useEffect, useMemo } from "react";
 import { Platform, PermissionsAndroid } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import GetLocation from "react-native-get-location";
@@ -76,11 +76,15 @@ export function MapProvider({ children }: { children: ReactNode }) {
 
     // Load location preference on mount
     useEffect(() => {
-        AsyncStorage.getItem(LOCATION_ENABLED_KEY).then((value) => {
-            if (value !== null) {
-                setLocationEnabledState(value === "true");
-            }
-        });
+        AsyncStorage.getItem(LOCATION_ENABLED_KEY)
+            .then((value) => {
+                if (value !== null) {
+                    setLocationEnabledState(value === "true");
+                }
+            })
+            .catch((error) => {
+                console.error("Failed to load location preference:", error);
+            });
     }, []);
 
     // Map state
@@ -192,7 +196,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
         }
     }, [updateLocationOnMap, locationEnabled]);
 
-    const value: MapContextType = {
+    const value = useMemo<MapContextType>(() => ({
         userLocation,
         isLoadingLocation,
         locationEnabled,
@@ -217,7 +221,28 @@ export function MapProvider({ children }: { children: ReactNode }) {
         setUserLocation,
         setIsLoadingLocation,
         setLocationEnabled,
-    };
+    }), [
+        userLocation,
+        isLoadingLocation,
+        locationEnabled,
+        mapCenter,
+        mapZoom,
+        selectedLocation,
+        selectedAddress,
+        savedPlaces,
+        searchResults,
+        isSearching,
+        searchQuery,
+        setMapCenter,
+        selectLocation,
+        clearSelection,
+        savePlace,
+        removePlace,
+        clearAllPlaces,
+        goToUserLocation,
+        setUserLocation,
+        setLocationEnabled,
+    ]);
 
     return <MapContext.Provider value={value}>{children}</MapContext.Provider>;
 }

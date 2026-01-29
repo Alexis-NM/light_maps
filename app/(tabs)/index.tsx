@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useMemo } from "react";
 import { View, StyleSheet, Pressable, ScrollView, Modal, Linking } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
@@ -51,13 +51,16 @@ export default function MapScreen() {
     const [placeDetails, setPlaceDetails] = useState<PlaceDetails | null>(null);
     const [showReviews, setShowReviews] = useState(false);
 
-    const backgroundColor = invertColors ? "#FFFFFF" : "#000000";
-    const textColor = invertColors ? "#000000" : "#FFFFFF";
-    const buttonBg = invertColors ? "#F0F0F0" : "#1A1A1A";
+    const colors = useMemo(() => ({
+        backgroundColor: invertColors ? "#FFFFFF" : "#000000",
+        textColor: invertColors ? "#000000" : "#FFFFFF",
+        buttonBg: invertColors ? "#F0F0F0" : "#1A1A1A",
+        darkModeStyles: invertColors ? "[]" : DARK_MAP_STYLES,
+    }), [invertColors]);
 
-    const darkModeStyles = invertColors ? "[]" : DARK_MAP_STYLES;
+    const { backgroundColor, textColor, buttonBg, darkModeStyles } = colors;
 
-    const htmlContent = `
+    const htmlContent = useMemo(() => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -282,7 +285,7 @@ export default function MapScreen() {
     <script src="https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap" async defer></script>
 </body>
 </html>
-    `;
+    `, [backgroundColor, darkModeStyles, mapId, mapCenter.latitude, mapCenter.longitude, mapZoom, invertColors, apiKey]);
 
     const handleMessage = useCallback(
         (event: WebViewMessageEvent) => {

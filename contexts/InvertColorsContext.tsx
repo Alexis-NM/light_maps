@@ -3,6 +3,8 @@ import React, {
 	useContext,
 	useState,
 	useEffect,
+	useCallback,
+	useMemo,
 	ReactNode,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -23,20 +25,29 @@ export const InvertColorsProvider = ({ children }: { children: ReactNode }) => {
 	const [invertColors, setInvertColorsState] = useState(false);
 
 	useEffect(() => {
-		AsyncStorage.getItem("invertColors").then((value) => {
-			if (value !== null) {
-				setInvertColorsState(value === "true");
-			}
-		});
+		AsyncStorage.getItem("invertColors")
+			.then((value) => {
+				if (value !== null) {
+					setInvertColorsState(value === "true");
+				}
+			})
+			.catch((error) => {
+				console.error("Failed to load theme preference:", error);
+			});
 	}, []);
 
-	const setInvertColors = async (value: boolean) => {
+	const setInvertColors = useCallback(async (value: boolean) => {
 		setInvertColorsState(value);
 		await AsyncStorage.setItem("invertColors", value.toString());
-	};
+	}, []);
+
+	const value = useMemo(() => ({
+		invertColors,
+		setInvertColors,
+	}), [invertColors, setInvertColors]);
 
 	return (
-		<InvertColorsContext.Provider value={{ invertColors, setInvertColors }}>
+		<InvertColorsContext.Provider value={value}>
 			{children}
 		</InvertColorsContext.Provider>
 	);
