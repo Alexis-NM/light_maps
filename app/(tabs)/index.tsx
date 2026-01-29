@@ -33,7 +33,7 @@ interface PlaceDetails {
 export default function MapScreen() {
     const { invertColors } = useInvertColors();
     const { triggerHaptic } = useHaptic();
-    const { apiKey } = useApiKey();
+    const { apiKey, mapId } = useApiKey();
     const {
         webViewRef,
         mapCenter,
@@ -85,21 +85,33 @@ export default function MapScreen() {
 
         function initMap() {
             const mapStyles = ${darkModeStyles};
+            const mapIdValue = "${mapId || ""}";
 
-            map = new google.maps.Map(document.getElementById("map"), {
+            const mapOptions = {
                 center: { lat: ${mapCenter.latitude}, lng: ${mapCenter.longitude} },
                 zoom: ${mapZoom},
-                styles: mapStyles,
                 disableDefaultUI: true,
                 zoomControl: false,
                 mapTypeControl: false,
                 scaleControl: false,
                 streetViewControl: false,
-                rotateControl: false,
                 fullscreenControl: false,
                 gestureHandling: "greedy",
                 clickableIcons: true
-            });
+            };
+
+            // If mapId is provided, use Vector Maps with rotation support
+            if (mapIdValue) {
+                mapOptions.mapId = mapIdValue;
+                // Vector Maps: use colorScheme for dark/light mode
+                mapOptions.colorScheme = "${invertColors ? "LIGHT" : "DARK"}";
+            } else {
+                // Raster maps: use custom styles (no rotation)
+                mapOptions.styles = mapStyles;
+                mapOptions.rotateControl = false;
+            }
+
+            map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
             placesService = new google.maps.places.PlacesService(map);
 
@@ -228,6 +240,13 @@ export default function MapScreen() {
             }
         }
 
+        function resetHeading() {
+            if (map) {
+                map.setHeading(0);
+                map.setTilt(0);
+            }
+        }
+
         function goToPlace(lat, lng, name) {
             setCenter(lat, lng, 17);
             if (selectedMarker) selectedMarker.setMap(null);
@@ -338,6 +357,11 @@ export default function MapScreen() {
         webViewRef.current?.injectJavaScript(`map.setZoom(map.getZoom() - 1); true;`);
     };
 
+    const handleResetHeading = () => {
+        triggerHaptic();
+        webViewRef.current?.injectJavaScript(`resetHeading(); true;`);
+    };
+
     const handleSaveLocation = () => {
         if (selectedLocation) {
             triggerHaptic();
@@ -414,6 +438,16 @@ export default function MapScreen() {
                     <MaterialIcons name="remove" size={n(24)} color={textColor} />
                 </Pressable>
             </View>
+
+            {/* Compass button (reset heading) - only shown when mapId is configured */}
+            {mapId && (
+                <Pressable
+                    onPress={handleResetHeading}
+                    style={[styles.compassButton, { backgroundColor: buttonBg }]}
+                >
+                    <MaterialIcons name="explore" size={n(24)} color={textColor} />
+                </Pressable>
+            )}
 
             {/* My location button */}
             <Pressable
@@ -623,6 +657,14 @@ const styles = StyleSheet.create({
     },
     zoomDivider: {
         height: 1,
+    },
+    // Compass button - above my location button
+    compassButton: {
+        position: "absolute",
+        right: n(12),
+        bottom: n(160),
+        padding: n(12),
+        borderRadius: n(8),
     },
     // Location button - above navbar
     myLocationButton: {

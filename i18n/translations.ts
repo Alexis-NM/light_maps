@@ -29,6 +29,7 @@ export const translations = {
         searchEmpty: "Search for places, addresses, or businesses",
         noResults: "No results found",
         networkError: "Network error. Please try again.",
+        recentSearches: "Recent",
 
         // Saved places
         savedPlaces: "Saved Places",
@@ -66,7 +67,7 @@ export const translations = {
         noPlacesToClear: "No Places",
         noPlacesToClearMessage: "You don't have any saved places to clear.",
         about: "About",
-        version: "Maps v1.0.5",
+        version: "Maps v1.0.6",
         description: "Maps for Light Phone III",
 
         // API Key
@@ -81,6 +82,18 @@ export const translations = {
         deleteApiKeyConfirm: "This will remove your API key. You'll need to enter it again.",
         apiKeyConfigured: "Key configured",
         modifyApiKey: "Modify API Key",
+
+        // Map ID (for rotation)
+        mapSettings: "Map",
+        mapId: "Map ID",
+        mapIdDescription: "Enable map rotation with two fingers",
+        mapIdPlaceholder: "Paste your Map ID here",
+        mapIdConfigured: "Rotation enabled",
+        modifyMapId: "Configure Map ID",
+        deleteMapId: "Delete Map ID",
+        deleteMapIdTitle: "Delete Map ID",
+        deleteMapIdConfirm: "This will disable map rotation.",
+        mapIdHelp: "Create a Map ID in Google Cloud Console → Google Maps Platform → Map management",
 
         // Common
         cancel: "Cancel",
@@ -122,6 +135,7 @@ export const translations = {
         searchEmpty: "Recherchez des lieux, adresses ou commerces",
         noResults: "Aucun résultat",
         networkError: "Erreur réseau. Réessayez.",
+        recentSearches: "Récents",
 
         // Saved places
         savedPlaces: "Lieux favoris",
@@ -159,7 +173,7 @@ export const translations = {
         noPlacesToClear: "Aucun favori",
         noPlacesToClearMessage: "Vous n'avez aucun favori à supprimer.",
         about: "À propos",
-        version: "Maps v1.0.5",
+        version: "Maps v1.0.6",
         description: "Cartes pour Light Phone III",
 
         // API Key
@@ -174,6 +188,18 @@ export const translations = {
         deleteApiKeyConfirm: "Cela supprimera votre clé API. Vous devrez la saisir à nouveau.",
         apiKeyConfigured: "Clé configurée",
         modifyApiKey: "Modifier la clé API",
+
+        // Map ID (for rotation)
+        mapSettings: "Carte",
+        mapId: "Map ID",
+        mapIdDescription: "Activer la rotation de la carte à deux doigts",
+        mapIdPlaceholder: "Collez votre Map ID ici",
+        mapIdConfigured: "Rotation activée",
+        modifyMapId: "Configurer le Map ID",
+        deleteMapId: "Supprimer le Map ID",
+        deleteMapIdTitle: "Supprimer le Map ID",
+        deleteMapIdConfirm: "Cela désactivera la rotation de la carte.",
+        mapIdHelp: "Créez un Map ID dans Google Cloud Console → Google Maps Platform → Gestion des plans",
 
         // Common
         cancel: "Annuler",

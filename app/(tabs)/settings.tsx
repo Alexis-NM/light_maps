@@ -18,7 +18,7 @@ export default function SettingsScreen() {
     const params = useLocalSearchParams<{ confirmed?: string; action?: string }>();
     const { invertColors } = useInvertColors();
     const { savedPlaces, clearAllPlaces, locationEnabled, setLocationEnabled } = useMap();
-    const { hasKey, deleteApiKey } = useApiKey();
+    const { hasKey, deleteApiKey, hasMapId, deleteMapId } = useApiKey();
 
     const textColor = invertColors ? "#000000" : "#FFFFFF";
 
@@ -30,9 +30,11 @@ export default function SettingsScreen() {
                 Alert.alert(t("cleared"), t("clearedMessage"));
             } else if (params.action === "deleteApiKey") {
                 deleteApiKey();
+            } else if (params.action === "deleteMapId") {
+                deleteMapId();
             }
         }
-    }, [params.confirmed, params.action, clearAllPlaces, deleteApiKey]);
+    }, [params.confirmed, params.action, clearAllPlaces, deleteApiKey, deleteMapId]);
 
     const handleClearSavedPlaces = () => {
         if (savedPlaces.length === 0) {
@@ -128,6 +130,51 @@ export default function SettingsScreen() {
 
                 <Separator />
 
+                {/* Map Settings (Map ID for rotation) */}
+                <View style={styles.section}>
+                    <StyledText style={[styles.sectionTitle, { color: textColor + "80" }]}>
+                        {t("mapSettings")}
+                    </StyledText>
+                    <StyledText style={[styles.mapIdDescription, { color: textColor + "60" }]}>
+                        {t("mapIdDescription")}
+                    </StyledText>
+                    {hasMapId && (
+                        <View style={styles.apiKeyStatus}>
+                            <MaterialIcons name="check-circle" size={n(16)} color="#34A853" />
+                            <StyledText style={[styles.apiKeyText, { color: textColor }]}>
+                                {t("mapIdConfigured")}
+                            </StyledText>
+                        </View>
+                    )}
+                    <View style={styles.apiKeyButtons}>
+                        <StyledButton
+                            text={t("modifyMapId")}
+                            onPress={() => router.push("/setup-map-id")}
+                            underline={true}
+                        />
+                        {hasMapId && (
+                            <StyledButton
+                                text={t("deleteMapId")}
+                                onPress={() => {
+                                    router.push({
+                                        pathname: "/confirm",
+                                        params: {
+                                            title: t("deleteMapIdTitle"),
+                                            message: t("deleteMapIdConfirm"),
+                                            confirmText: t("delete"),
+                                            action: "deleteMapId",
+                                            returnPath: "/(tabs)/settings",
+                                        },
+                                    });
+                                }}
+                                underline={true}
+                            />
+                        )}
+                    </View>
+                </View>
+
+                <Separator />
+
                 {/* Data */}
                 <View style={styles.section}>
                     <StyledText style={[styles.sectionTitle, { color: textColor + "80" }]}>
@@ -199,5 +246,10 @@ const styles = StyleSheet.create({
     },
     apiKeyButtons: {
         gap: n(8),
+    },
+    mapIdDescription: {
+        fontSize: n(13),
+        marginBottom: n(10),
+        lineHeight: n(18),
     },
 });

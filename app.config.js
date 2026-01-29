@@ -4,7 +4,7 @@ export default {
     expo: {
         name: "Maps",
         slug: "light-maps",
-        version: "1.0.5",
+        version: "1.0.6",
         orientation: "portrait",
         scheme: "lightmaps",
         newArchEnabled: false,
